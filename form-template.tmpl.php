@@ -116,7 +116,7 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
             'post_status' => 'publish',
         ));
 
-        add_post_meta($annonse_id, 'ad_posts_info', json_encode($post_info));
+        add_post_meta($annonse_id, 'ad_posts_info', json_encode($post_info, JSON_UNESCAPED_UNICODE));
         add_post_meta($annonse_id, 'ad_posts_expire', $expire_date);
         unset($_POST);
 

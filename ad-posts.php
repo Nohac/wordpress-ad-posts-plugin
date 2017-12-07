@@ -36,7 +36,7 @@ function ad_posts_list() {
             return;
         }
 
-        $info = json_decode($meta[0], true);
+        $info = json_decode($meta[0], true, 512, JSON_UNESCAPED_UNICODE);
         $info['expire'] = $expire[0];
         $info['title'] = $post->post_title;
         $info['text'] = $post->post_content;
