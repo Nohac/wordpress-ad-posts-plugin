@@ -1,91 +1,125 @@
-<?php 
+<?php
 
 function post($key) {
     if (isset($_POST[$key]))
         return $_POST[$key];
 }
 
-if (count($_POST) == 0) {
-    goto NO_POST;
-}
+$form_data = array(
+    'name' => '',
+    'email' => '',
+    'phone' => '',
+    'expire' => '',
+    'title' => '',
+    'text' => '',
+};
 
-if ($name = post("ad_name")) {
-    $name = sanitize_text_field($name);
-} else {
-    $errors[] = "Navn er påkrevd.";
-}
+// Validates form input ande returns an array with sanitized input and list of
+// error messages.
+// @Param $form_input An associative array with fields to be validated (use $form_data)
+// @Return array('errors', // string array, validation errors
+//               'form_data', // string array, a sanitized version of the input ($form_input)
+//               )
+function validate_form_input($form_input) {
+    $errors = array();
 
-if ($email = post("ad_email")) {
-    if (!is_email($email))
-        $errors[] = 'E-postadressen er ikke gyldig.';
-    $email = sanitize_text_field($email);
-} else {
-    $errors[] = "E-post er påkrevd.";
-}
-
-if ($phone = post("ad_phone")) {
-    $phone = sanitize_text_field($phone);
-} else {
-    $errors[] = "Telefon-nummer er påkrevd.";
-}
-
-if ($expire = post("ad_expire")) {
-    $expire = intval($expire);
-    if ($expire<=0 || $expire>3) {
-        $errors[] = "Du må velge en annonsetid.";
+    // These if-checks triggers if the array fields have content (i.e. not
+    // NULL or '')
+    if ($form_input['name']) {
+        $form_input['name'] = sanitize_text_field($form_input['name']);
     } else {
-        $expire_date = time() + (
-            60  // Seconds
-            *60 // Minutes 
-            *24 // Hours
-            *(
-                7 // Days
-                *$expire // Number of weeks
-            )
+        $errors[] = "Navn er p&aring;krevd.";
+    }
+
+    if ($form_input['email']) {
+        if (!is_email($form_input['email'])0
+            $errors[] = 'E-postadressen er ikke gyldig.';
+        $form_input['email'] = sanitize_text_field($form_input['email']);
+    } else {
+        $errors[] = "E-post er p&aring;krevd.";
+    }
+
+    if ($form_input['phone']) {
+        $form_input['phone'] = sanitize_text_field($form_input['phone']);
+    } else {
+        $errors[] = "Telefonnummer er p&aring;krevd.";
+    }
+
+
+    if ($form_input['expire']) {
+        $form_input['expire'] = intval($form_input['expire']);
+        if ($form_input['expire']<=0 || $form_input['expire']>3) {
+            $errors[] = "Du må velge en annonsetid.";
+        } else {
+            $expire_date = time() + (
+                60  // Seconds
+                *60 // Minutes
+                *24 // Hours
+                *(
+                    7 // Days
+                    *$form_input['expire'] // Number of weeks
+                )
+            );
+        }
+    } else {
+        $errors[] = "Du må velge en annonsetid.";
+    }
+
+
+    if ($form_input['title']) {
+        $form_input['title'] = sanitize_text_field($form_input['title']);
+    } else {
+        $errors[] = "Overskrift er p&aring;krevd.";
+    }
+
+    if ($form_input['text']) {
+        $form_input['text'] = sanitize_text_field($form_input['text']);
+        if (strlen($form_input['text']) > 150) {
+            $errors[] = "Lengden på din melding er på ".strlen($form_input['text'])." av 150 mulige bokstaver.";
+        }
+    } else {
+        $errors[] = "Annonse-tekst er p&aring;krevd";
+    }
+
+    return array('form_date' => $form_input, 'errors' => $errors);
+}
+
+if (isset($_GET['success']) && $_GET['success'] == 'true') {
+    // A form has already been submitted. Set success=true so we can show
+    // a confirmation box.
+    $success = true;
+} else if (count($_POST) > 0) {
+
+    $form_data['name'] = post("ad_name");
+    $form_data['email'] = post("ad_email");
+    $form_data['phone'] = post("ad_phone");
+    $form_data['expire'] = post("ad_expire");
+    $form_data['title'] = post("ad_title");
+    $form_data['text'] = post("ad_text");
+
+    $ret = validate_form_input($form_data);
+    $errors = $ret['errors'];
+    $data = $ret['form_data'];
+
+
+    if (!(isset($ret['errors']) && count($ret['errors'])>0)) {
+        $post_info = array(
+            'email' => $data['email'],
+            'name' => $data['name'],
+            'phone' => $data['phone'],
         );
+
+        $annonse_id = wp_insert_post(array(
+            'post_title' => $data['title'],
+            'post_content' => $data['text'],
+            'post_type' => 'ad_posts'
+        ));
+
+        add_post_meta($annonse_id, 'ad_posts_info', json_encode($post_info));
+        add_post_meta($annonse_id, 'ad_posts_expire', $expire_date);
+        unset($_POST);
     }
-} else {
-    $errors[] = "Du må velge en annonsetid.";
 }
- 
-if ($title = post("ad_title")) {
-    $title = sanitize_text_field($title);
-} else {
-    $errors[] = "Overskrift er påkrevd.";
-}
-
-if ($text = post("ad_text")) {
-    $text = sanitize_text_field($text);
-    if (strlen($text) > 150) {
-        $errors[] = "Lengden på din annonse-tekst er på ".strlen($text)." av 150 mulige bokstaver.";
-    }
-} else {
-    $errors[] = "Annonse-tekst er påkrevd";
-}
-
-if (isset($errors) && count($errors)>0) {
-    goto NO_POST;
-}
-
-$post_info = array(
-    'email' => $email,
-    'name' => $name,
-    'phone' => $phone,
-);
-
-$annonse_id = wp_insert_post(array(
-    'post_title' => $title,
-    'post_content' => $text,
-    'post_type' => 'ad_posts'
-));
-
-add_post_meta($annonse_id, 'ad_posts_info', json_encode($post_info));
-add_post_meta($annonse_id, 'ad_posts_expire', $expire_date);
-$success = true;
-unset($_POST);
-
-NO_POST:
-
 ?>
 
 <div class="ad-posts-submit">
