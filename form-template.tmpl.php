@@ -119,6 +119,25 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
         add_post_meta($annonse_id, 'ad_posts_info', json_encode($post_info));
         add_post_meta($annonse_id, 'ad_posts_expire', $expire_date);
         unset($_POST);
+
+        // We "refresh" the page to get rid of POST parameters, so that the post
+        // won't get reposted if the user refreshes the page manually. Also pass a
+        // 'success' parameter so we know that we should display a confirmation
+        // message.
+
+        // XXX(nicolai): I should've known this wouldn't work, shouldn't I.
+        // wp_redirect("?success=true", 200);
+
+        // XXX(nicolai): If you find some other way of avoiding dupliate
+        // entries when users refresh the form, please use that other way.
+        // I'll leave some javascript here that will refresh the page in the
+        // way I wanted with wp_redirect
+
+?>
+        <script type="text/javascript">
+            window.location = '?success=true'
+        </script>
+<?php
     }
 }
 ?>
@@ -126,10 +145,13 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
 <div class="ad-posts-submit">
     <?php if (isset($success)): ?>
     <div class="error" style="width: 100%; padding: 10px; background-color: #7cd170; color: white;">
-    Din annonse har blit sendt inn til vurdering og vil snart dukke opp på vår nettside. <br>
+    Din annonse har blit sendt inn til vurdering og vil snart dukke opp p&aring; v&aring;r nettside. <br>
     Ha en fin dag!
+    <br>
+    <br>
+    <a href="?">Trykk her for &aring; legge til en ny annonse.</a>
     </div>
-    <?php endif ?>
+    <?php else: ?>
     <form action="" method="post">
         <label>Navn</label>
         <input type="text" name="ad_name" value="<?= post('ad_name') ?>"/>
@@ -142,7 +164,7 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
         <br>
         <label>Annonsen utgår om</label>
         <select name="ad_expire" style="width: 100%;">
-            <option value="1" >En uke</option>
+            <option value="1">En uke</option>
             <option value="2">To uker</option>
             <option value="3">Tre uker</option>
         </select>
@@ -169,4 +191,5 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
         <?php endif ?>
         <button>Send inn annonse</button>
     </form>
+    <?php endif ?>
 </div>
