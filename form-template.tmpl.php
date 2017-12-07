@@ -81,7 +81,7 @@ function validate_form_input($form_input) {
         $errors[] = "Annonse-tekst er p&aring;krevd";
     }
 
-    return array('form_date' => $form_input, 'errors' => $errors);
+    return array('form_data' => $form_input, 'errors' => $errors);
 }
 
 if (isset($_GET['success']) && $_GET['success'] == 'true') {
