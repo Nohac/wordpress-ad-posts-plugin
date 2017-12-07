@@ -51,7 +51,7 @@ function validate_form_input($form_input) {
         if ($form_input['expire']<=0 || $form_input['expire']>3) {
             $errors[] = "Du må velge en annonsetid.";
         } else {
-            $expire_date = time() + (
+            $form_input['expire'] = time() + (
                 60  // Seconds
                 *60 // Minutes
                 *24 // Hours
@@ -117,7 +117,7 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
         ));
 
         add_post_meta($annonse_id, 'ad_posts_info', json_encode($post_info, JSON_UNESCAPED_UNICODE));
-        add_post_meta($annonse_id, 'ad_posts_expire', $expire_date);
+        add_post_meta($annonse_id, 'ad_posts_expire', $data['expire']);
         unset($_POST);
 
         // We "refresh" the page to get rid of POST parameters, so that the post
