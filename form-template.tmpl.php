@@ -12,7 +12,7 @@ $form_data = array(
     'expire' => '',
     'title' => '',
     'text' => '',
-};
+);
 
 // Validates form input ande returns an array with sanitized input and list of
 // error messages.
@@ -32,7 +32,7 @@ function validate_form_input($form_input) {
     }
 
     if ($form_input['email']) {
-        if (!is_email($form_input['email'])0
+        if (!is_email($form_input['email']))
             $errors[] = 'E-postadressen er ikke gyldig.';
         $form_input['email'] = sanitize_text_field($form_input['email']);
     } else {
