@@ -112,7 +112,8 @@ if (isset($_GET['success']) && $_GET['success'] == 'true') {
         $annonse_id = wp_insert_post(array(
             'post_title' => $data['title'],
             'post_content' => $data['text'],
-            'post_type' => 'ad_posts'
+            'post_type' => 'ad_posts',
+            'post_status' => 'publish',
         ));
 
         add_post_meta($annonse_id, 'ad_posts_info', json_encode($post_info));
