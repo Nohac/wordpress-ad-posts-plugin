@@ -59,18 +59,18 @@ function ad_posts_create_post_type() {
         )
     );
 
-    add_meta_box('ad_posts_info', 'Annonse info', function($args) { 
-        $meta   = get_post_meta($args->ID, 'ad_posts_info');
-        $expire = get_post_meta($args->ID, 'ad_posts_expire');
-
-        if (!isset($meta[0]) || !isset($expire[0])) {
-            return;
-        }
-
-        $data = json_decode($meta[0], true);
-        $data['expire'] = $expire[0];
-        ad_posts_tmpl('show-info', $data);
-    }, 'ad_posts');
+    // add_meta_box('ad_posts_info', 'Annonse info', function($args) { 
+    //     $meta   = get_post_meta($args->ID, 'ad_posts_info');
+    //     $expire = get_post_meta($args->ID, 'ad_posts_expire');
+    //
+    //     if (!isset($meta[0]) || !isset($expire[0])) {
+    //         return;
+    //     }
+    //
+    //     $data = json_decode($meta[0], true);
+    //     $data['expire'] = $expire[0];
+    //     ad_posts_tmpl('show-info', $data);
+    // }, 'ad_posts');
 }
 
 function get_ad_posts($args = null) {
